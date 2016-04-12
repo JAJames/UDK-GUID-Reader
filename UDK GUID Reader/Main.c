@@ -26,7 +26,6 @@ int main(int argc, const char **args)
 	const char *filename;
 	FILE *file;
 	uint32_t GUID[4];
-	int chr;
 
 	if (argc < 2 || strcmp(args[1], "-help") == 0 || strcmp(args[1], "/?") == 0)
 	{
@@ -43,21 +42,14 @@ int main(int argc, const char **args)
 		return 0;
 	}
 
-	// seek to string
-	fseek(file, 0x10, SEEK_CUR);
-
-	// parse through string
-	while (chr = fgetc(file) != 0)
-	{
-		if (chr == EOF)
-		{
-			puts("ERROR: UNEXPECTED EOF.");
-			return 0;
-		}
-	}
+	// seek to string size
+	fseek(file, 0x0C, SEEK_CUR);
+	
+	// read string size (repurpose GUID[0])
+	fread(GUID, sizeof(uint32_t), 1, file);
 
 	// seek to GUID
-	fseek(file, 48, SEEK_CUR);
+	fseek(file, *GUID + 0x30, SEEK_CUR);
 
 	// read GUID
 	if (fread(GUID, sizeof(uint32_t), 4, file) != 4)
